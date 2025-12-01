@@ -1,6 +1,8 @@
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const jwt = require('jsonwebtoken');
+const swaggerUi = require('swagger-ui-express'); // Importa o visualizador
+const swaggerDocument = require('./swagger.json'); // Importa o arquivo JSON
 
 const app = express();
 
@@ -9,6 +11,10 @@ app.use(express.json());
 
 // Senha mestra
 const SECRET_KEY = 'minha_senha_mestra';
+
+// --- ROTA DA DOCUMENTAÇÃO (SWAGGER) ---
+// Ao acessar http://localhost:3000/api-docs você verá a interface gráfica
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // --- MIDDLEWARE DE AUTENTICAÇÃO ---
 function verificarToken(req, res, next){
