@@ -18,6 +18,8 @@
   "homepage": "https://github.com/NicolasKCS/Desafio-Jitter#readme",
   "dependencies": {
     "express": "^5.1.0",
-    "sqlite3": "^5.1.7"
+    "jsonwebtoken": "^9.0.2",
+    "sqlite3": "^5.1.7",
+    "swagger-ui-express": "^5.0.1"
   }
 }
