@@ -11,13 +11,28 @@ git push
 
 # Configurações node.js
 
-npm init
-npm install express
-npm install express sqlite3 (SQLlite para facilitar o teste)
+- npm init
+- npm install express
+- npm install express sqlite3 // (SQLlite para facilitar o teste)
+- npm install jsonwebtoken  // JWT
+- npm install swagger-ui-express // Swagger
 
 # start server
 
 node .\index.js
+
+# Essa parte é para o desafio completo, com token JWT e Swagger
+
+1. rode o servidor com node ./index.js
+2. entre no swagger no seu navegador com http://localhost:3000/api-docs
+3. Faça o login (usuário e senha já estão colocados)
+4. pegue o token do login e clique em  "Authorize" e coloque o token sem as aspas " "
+5. Agora pode testar todas as requisições de API que elas vão funcionar
+6. Caso faça logout em "Authorize", tente fazer requisições. Elas devem falhar por falta de autenticação.
+
+## Todos os comandos abaixo são para fazer testes sem o token JWT e o Swagger
+
+Pode entrar na branch sem-token para testar
 
 # enviar requisições
 entrar no git bash 
@@ -63,7 +78,7 @@ curl --location 'http://localhost:3000/order' \
 
 curl http://localhost:3000/order/v10089015vdb-01 <-- precisa ser o mesmo valor do "numeroPedido">
 
-curl http://localhost:3000/order/v10089015vdb-02 <-- deve retornar pedido nao encontrado>
+curl http://localhost:3000/order/v10089015vdb-03 <-- deve retornar pedido nao encontrado>
 
 # listar os pedidos
 
