@@ -78,7 +78,7 @@ curl --location 'http://localhost:3000/order' \
 
 curl http://localhost:3000/order/v10089015vdb-01 <-- precisa ser o mesmo valor do "numeroPedido">
 
-curl http://localhost:3000/order/v10089015vdb-02 <-- deve retornar pedido nao encontrado>
+curl http://localhost:3000/order/v10089015vdb-03 <-- deve retornar pedido nao encontrado>
 
 # listar os pedidos
 
