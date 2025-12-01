@@ -84,6 +84,68 @@ app.post('/order', (req, res) => {
     });
 });
 
+// ROTA 3: listar todos os pedidos (GET)
+app.get('/order/list', (req, res) => {
+    const sql = `SELECT * FROM orders`;
+    db.all(sql, [], (err, orders) => {
+        if (err) return res.status(500).json({ erro: err.message });
+        if (orders.length === 0) return res.status(404).json({ message: "não há pedidos cadastrados" });
+
+        // Passo 2: Buscar todos os itens de uma vez
+        db.all(`SELECT * FROM items`, [], (err, items) => {
+            if (err) return res.status(500).json({ erro: err.message });
+
+            // Passo 3: A Manipulação (O "Match")
+            // Para cada pedido, vamos filtrar os itens que pertencem a ele
+            const pedidosCompletos = orders.map(pedido => {
+                return {
+                    orderId: pedido.orderId,
+                    value: pedido.value,
+                    creationDate: pedido.creationDate,
+                    // pegamos só os itens desse ID
+                    // utilizamos o map de novo para transformar os itens sem as informacoes do Banco de dados
+                    items: items.filter(item => item.orderId === pedido.orderId).map(i => ({
+                        productId: i.productId,
+                        quantity: i.quantity,
+                        price: i.price
+                    }))
+                };
+            });
+
+            // Retorna a lista montada
+            res.json(pedidosCompletos);
+        });
+    });
+});
+
+// ATUALIZAR PEDIDO (PUT)
+app.put('/order/:id', (req, res) => {
+
+    const id = req.params.id;
+    const entrada = req.body;
+    const sql = `UPDATE orders SET value = ?, creationDate = ? WHERE orderId = ?`;
+
+    db.run(sql, [entrada.valorTotal, entrada.dataCriacao, id], function(err) {
+
+        if (err) return res.status(500).json({ erro: err.message });
+        if (this.changes === 0) return res.status(404).json({ message: "Pedido não encontrado" });
+
+        const removeItemsSql = `DELETE FROM items WHERE orderId = ?`;
+
+        db.run(removeItemsSql, [id], function(err) {
+            if (err) return res.status(500).json({ erro: err.message });
+
+            const insertItemSql = `INSERT INTO items (orderId, productId, quantity, price) VALUES (?, ?, ?, ?)`;
+            const items = entrada.items || [];
+            
+            items.forEach(item => {
+                db.run(insertItemSql, [id, item.idItem, item.quantidadeItem, item.valorItem]);
+            });
+            res.json({ message: "Pedido atualizado com sucesso!" });
+        });
+    });
+});
+
 // ROTA 2: LER PEDIDO (GET)
 app.get('/order/:id', (req, res) => {
     const id = req.params.id;
@@ -108,6 +170,11 @@ app.get('/order/:id', (req, res) => {
         });
     });
 });
+
+
+
+
+
 
 // INICIAR O SERVIDOR
 const PORT = 3000;
