@@ -34,6 +34,19 @@ node .\index.js
 
 Pode entrar na branch sem-token para testar
 
+# Essa parte é para o desafio completo, com token JWT e Swagger
+
+1. rode o servidor com node ./index.js
+2. entre no swagger no seu navegador com http://localhost:3000/api-docs
+3. Faça o login (usuário e senha já estão colocados)
+4. pegue o token do login e clique em  "Authorize" e coloque o token sem as aspas " "
+5. Agora pode testar todas as requisições de API que elas vão funcionar
+6. Caso faça logout em "Authorize", tente fazer requisições. Elas devem falhar por falta de autenticação.
+
+## Todos os comandos abaixo são para fazer testes sem o token JWT e o Swagger
+
+Pode entrar na branch sem-token para testar
+
 # enviar requisições
 entrar no git bash 
 
