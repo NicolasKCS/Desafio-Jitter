@@ -105,3 +105,11 @@ curl -X PUT --location 'http://localhost:3000/order/v10089015vdb-02' \
         }
     ]
 }'
+
+# Remover pedidos 
+
+Remove o pedido e todos os seus items relacionados.
+
+curl -X DELETE http://localhost:3000/order/v10089015vdb-01
+
+curl -X DELETE http://localhost:3000/order/v10089015vdb-02

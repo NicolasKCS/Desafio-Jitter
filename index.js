@@ -36,7 +36,7 @@ db.serialize(() => {
 
 // --- ROTAS DA API ---
 
-// ROTA 1: CRIAR PEDIDO (POST)
+//  CRIAR PEDIDO (POST)
 app.post('/order', (req, res) => {
     const entrada = req.body;
 
@@ -84,7 +84,7 @@ app.post('/order', (req, res) => {
     });
 });
 
-// ROTA 3: listar todos os pedidos (GET)
+// listar todos os pedidos (GET)
 app.get('/order/list', (req, res) => {
     const sql = `SELECT * FROM orders`;
     db.all(sql, [], (err, orders) => {
@@ -118,6 +118,32 @@ app.get('/order/list', (req, res) => {
     });
 });
 
+
+// LER PEDIDO (GET)
+app.get('/order/:id', (req, res) => {
+    const id = req.params.id;
+    
+    const sql = `SELECT * FROM orders WHERE orderId = ?`;
+    
+    db.get(sql, [id], (err, row) => {
+        if (err) return res.status(500).json({ erro: err.message });
+        if (!row) return res.status(404).json({ message: "Pedido não encontrado" });
+
+        // Se achou o pedido, busca os itens dele
+        db.all(`SELECT productId, quantity, price FROM items WHERE orderId = ?`, [id], (errItems, rowsItems) => {
+            if (errItems) return res.status(500).json({ erro: errItems.message });
+
+            // Monta o objeto final
+            res.json({
+                orderId: row.orderId,
+                value: row.value,
+                creationDate: row.creationDate,
+                items: rowsItems
+            });
+        });
+    });
+});
+
 // ATUALIZAR PEDIDO (PUT)
 app.put('/order/:id', (req, res) => {
 
@@ -146,33 +172,21 @@ app.put('/order/:id', (req, res) => {
     });
 });
 
-// ROTA 2: LER PEDIDO (GET)
-app.get('/order/:id', (req, res) => {
+// DELETAR PEDIDO (DELETE)
+app.delete('/order/:id', (req, res) => {
     const id = req.params.id;
-    
-    const sql = `SELECT * FROM orders WHERE orderId = ?`;
-    
-    db.get(sql, [id], (err, row) => {
+    const sql = `DELETE FROM orders WHERE orderId = ?`;
+    db.run(sql, [id], function(err) {
         if (err) return res.status(500).json({ erro: err.message });
-        if (!row) return res.status(404).json({ message: "Pedido não encontrado" });
-
-        // Se achou o pedido, busca os itens dele
-        db.all(`SELECT productId, quantity, price FROM items WHERE orderId = ?`, [id], (errItems, rowsItems) => {
+        if (this.changes === 0) return res.status(404).json({ message: "Pedido não encontrado" });
+        // Também deletar os itens relacionados
+        const deleteItemsSql = `DELETE FROM items WHERE orderId = ?`;
+        db.run(deleteItemsSql, [id], function(errItems) {
             if (errItems) return res.status(500).json({ erro: errItems.message });
-
-            // Monta o objeto final
-            res.json({
-                orderId: row.orderId,
-                value: row.value,
-                creationDate: row.creationDate,
-                items: rowsItems
-            });
+            res.json({ message: "Pedido e itens deletados com sucesso!" });
         });
     });
 });
-
-
-
 
 
 
