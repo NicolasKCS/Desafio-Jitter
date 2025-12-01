@@ -1,10 +1,31 @@
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
+const jwt = require('jsonwebtoken');
 
 const app = express();
 
 // Usamos o próprio express para ler JSON. Isso é mais seguro e moderno.
 app.use(express.json()); 
+
+// Senha mestra
+const SECRET_KEY = 'minha_senha_mestra';
+
+// --- MIDDLEWARE DE AUTENTICAÇÃO ---
+function verificarToken(req, res, next){
+    const authHeader = req.headers['authorization'];
+    // se nao mandou token
+    if (!authHeader) 
+        return res.status(401).json({ auth: false, message: 'Acesso negado: Nenhum token fornecido.' });
+
+    const token = authHeader.split(' ')[1];
+    
+    jwt.verify(token, SECRET_KEY, (err, decoded) => {
+        if (err) return res.status(403).json({ erro: 'Token inválido' });
+        // Se passou, salva o ID e deixa entrar (next)
+        req.userId = decoded.id;
+        next();
+    });
+};
 
 // 2. CONFIGURAÇÃO DO BANCO DE DADOS (SQLite)
 // Isso cria um arquivo 'database.db' na sua pasta automaticamente.
@@ -36,8 +57,20 @@ db.serialize(() => {
 
 // --- ROTAS DA API ---
 
-//  CRIAR PEDIDO (POST)
-app.post('/order', (req, res) => {
+//login para gerar o token
+app.post('/login', (req, res) => {
+    const usuario = req.body.usuario;
+    // Aqui você pode validar o usuário e senha (hardcoded para simplicidade)
+    if (usuario === 'admin' && req.body.senha === 'password') {
+        const token = jwt.sign({ id: usuario }, SECRET_KEY, { expiresIn: '1h' });
+        res.json({ auth: true, token: token });
+    } else {
+        res.status(401).json({ auth: false, message: 'Usuário ou senha inválidos.' });
+    }   
+});
+
+//  CRIAR PEDIDO (POST) verificarToken adicionado como middleware
+app.post('/order', verificarToken, (req, res) => {
     const entrada = req.body;
 
     // Validação básica
@@ -84,8 +117,8 @@ app.post('/order', (req, res) => {
     });
 });
 
-// listar todos os pedidos (GET)
-app.get('/order/list', (req, res) => {
+// listar todos os pedidos (GET) verificarToken adicionado como middleware
+app.get('/order/list', verificarToken, (req, res) => {
     const sql = `SELECT * FROM orders`;
     db.all(sql, [], (err, orders) => {
         if (err) return res.status(500).json({ erro: err.message });
@@ -119,8 +152,8 @@ app.get('/order/list', (req, res) => {
 });
 
 
-// LER PEDIDO (GET)
-app.get('/order/:id', (req, res) => {
+// LER PEDIDO (GET) verificarToken adicionado como middleware
+app.get('/order/:id', verificarToken, (req, res) => {
     const id = req.params.id;
     
     const sql = `SELECT * FROM orders WHERE orderId = ?`;
@@ -144,8 +177,8 @@ app.get('/order/:id', (req, res) => {
     });
 });
 
-// ATUALIZAR PEDIDO (PUT)
-app.put('/order/:id', (req, res) => {
+// ATUALIZAR PEDIDO (PUT) verificarToken adicionado como middleware
+app.put('/order/:id', verificarToken, (req, res) => {
 
     const id = req.params.id;
     const entrada = req.body;
@@ -172,8 +205,8 @@ app.put('/order/:id', (req, res) => {
     });
 });
 
-// DELETAR PEDIDO (DELETE)
-app.delete('/order/:id', (req, res) => {
+// DELETAR PEDIDO (DELETE) verificarToken adicionado como middleware
+app.delete('/order/:id', verificarToken, (req, res) => {
     const id = req.params.id;
     const sql = `DELETE FROM orders WHERE orderId = ?`;
     db.run(sql, [id], function(err) {
@@ -194,4 +227,5 @@ app.delete('/order/:id', (req, res) => {
 const PORT = 3000;
 app.listen(PORT, () => {
     console.log(`Servidor rodando em http://localhost:${PORT}`);
+    console.log(`Swagger disponível em http://localhost:${PORT}/api-docs`);
 });

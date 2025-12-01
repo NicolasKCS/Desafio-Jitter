@@ -13,7 +13,9 @@ git push
 
 npm init
 npm install express
-npm install express sqlite3 (SQLlite para facilitar o teste)
+npm install express sqlite3 // (SQLlite para facilitar o teste)
+npm install jsonwebtoken  // JWT
+npm install swagger-ui-express // Swagger
 
 # start server
 
