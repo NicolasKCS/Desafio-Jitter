@@ -1,0 +1,152 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+      "title": "API - Desafio Jitterbit",
+      "version": "1.0.0",
+      "description": "API REST para gerenciamento de pedidos com autenticação JWT e banco de dados SQLite."
+    },
+    "servers": [
+      {
+        "url": "http://localhost:3000",
+        "description": "Servidor Local"
+      }
+    ],
+    "components": {
+      "securitySchemes": {
+        "bearerAuth": {
+          "type": "http",
+          "scheme": "bearer",
+          "bearerFormat": "JWT"
+        }
+      }
+    },
+    "paths": {
+      "/login": {
+        "post": {
+          "summary": "Realizar Login (Obter Token)",
+          "description": "Use: usuario='admin' e senha='password'",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "usuario": { "type": "string", "example": "admin" },
+                    "senha": { "type": "string", "example": "password" }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Sucesso",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "auth": true,
+                    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/order": {
+        "post": {
+          "summary": "Criar novo pedido",
+          "security": [{ "bearerAuth": [] }],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "numeroPedido": "v10089015vdb-01",
+                  "valorTotal": 10000,
+                  "dataCriacao": "2023-07-19T12:24:11.5299601+00:00",
+                  "items": [
+                    { "idItem": "2434", "quantidadeItem": 1, "valorItem": 1000 }
+                  ]
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": { "description": "Pedido criado com sucesso" },
+            "401": { "description": "Não autorizado" }
+          }
+        }
+      },
+      "/order/list": {
+        "get": {
+          "summary": "Listar todos os pedidos",
+          "security": [{ "bearerAuth": [] }],
+          "responses": {
+            "200": { "description": "Lista de pedidos retornada com sucesso" }
+          }
+        }
+      },
+      "/order/{id}": {
+        "get": {
+          "summary": "Buscar pedido por ID",
+          "security": [{ "bearerAuth": [] }],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": { "type": "string" }
+            }
+          ],
+          "responses": {
+            "200": { "description": "Dados do pedido encontrados" },
+            "404": { "description": "Pedido não encontrado" }
+          }
+        },
+        "put": {
+          "summary": "Atualizar pedido",
+          "security": [{ "bearerAuth": [] }],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": { "type": "string" }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "valorTotal": 5000,
+                  "dataCriacao": "2023-08-01T10:00:00.000Z",
+                  "items": [
+                    { "idItem": "9999", "quantidadeItem": 2, "valorItem": 2500 }
+                  ]
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": { "description": "Pedido atualizado" }
+          }
+        },
+        "delete": {
+          "summary": "Deletar pedido",
+          "security": [{ "bearerAuth": [] }],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": { "type": "string" }
+            }
+          ],
+          "responses": {
+            "200": { "description": "Pedido deletado" }
+          }
+        }
+      }
+    }
+  }
